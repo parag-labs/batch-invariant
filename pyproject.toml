@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "batch-invariant"
+version = "0.1.0"
+description = "Batch-invariant inference: a prompt's output must not depend on who else is in the batch. Demonstrates the reduction-order bug that breaks this, and a kernel that provably fixes it."
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Parag Sawant" }]
+keywords = ["llm", "inference", "determinism", "reproducibility", "floating-point", "batching"]
+
+[project.scripts]
+batch-invariant = "batch_invariant.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
