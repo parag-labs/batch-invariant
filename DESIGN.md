@@ -9,6 +9,10 @@ with greedy decoding, temperature 0 — but because the *arithmetic* changed. Th
 is a real, reported source of non-reproducible LLM inference, and it's subtle
 enough that most people don't believe it until they see a token flip.
 
+![architecture](docs/diagrams/architecture.png)
+
+*Master architecture view — source: [`docs/diagrams/architecture.svg`](docs/diagrams/architecture.svg).*
+
 Goals:
 
 - **Show the bug concretely** — not "logits differ by 1e-9" hand-waving, but a
