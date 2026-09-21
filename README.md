@@ -79,6 +79,47 @@ assert argmax(logits_alone(model, x, invariant=True)) == \
        argmax(logits_in_batch(model, x, others, invariant=True))
 ```
 
+## Six languages, one algorithm
+
+The pure-logic core — the float reductions, the variant vs invariant matmul, the
+toy decode step, and the constructed flip case — is implemented **identically in
+six languages**, each with its own idiomatic test suite. Every port reduces in the
+same order and produces bit-identical logits, so the invariance property holds the
+same way everywhere.
+
+| Language   | Location   | Tests |
+|------------|------------|-------|
+| Python     | `src/`     | 8     |
+| Go         | `go/`      | 24    |
+| Rust       | `rust/`    | 25    |
+| C#         | `csharp/`  | 30    |
+| Java       | `java/`    | 30    |
+| TypeScript | `ts/`      | 30    |
+
+**What the ports cover.** They mirror the deterministic algorithmic core:
+
+- `kernels` — `sum_flat`, `sum_split`, `splits_for_batch`, and the variant /
+  invariant matmuls (`FIXED_SPLITS = 4`).
+- `server` — the toy `Model`, `logits_alone`, `logits_in_batch`, `argmax`
+  (first-wins on ties), and `token_depends_on_batch`.
+- `flip_case` — the deterministic token-flip fixture. Python builds it from a
+  seeded `random.Random(514)`; the ports embed the *exact* weights and inputs it
+  produces as round-trip-safe constants rather than re-implementing CPython's
+  Mersenne Twister, so all six agree bit-for-bit.
+
+Deliberately **excluded**: the `cli` argparse layer (IO glue) and re-deriving the
+seeded RNG. Those aren't part of the correctness property.
+
+Run any port from its directory:
+
+```bash
+cd go   && go test ./...
+cd rust && cargo test
+cd csharp/tests && dotnet test
+cd java && mvn -q test
+cd ts   && npm install && npm test
+```
+
 ## Design decisions
 
 - **Explicit float reductions, no numpy** — so the reduction order is exactly what
@@ -101,7 +142,12 @@ batch-invariant/
 │   ├── server.py      # a toy decode step (logits -> argmax token)
 │   ├── demo_data.py   # the deterministic token-flip case
 │   └── cli.py         # demo / check
-└── tests/             # 8 tests: invariance, variant breakage, the token flip
+├── tests/             # 8 tests: invariance, variant breakage, the token flip
+├── go/                # Go port + go test suite
+├── rust/              # Rust port + cargo test suite
+├── csharp/            # C# port (src/ + tests/, xUnit)
+├── java/              # Java port (Maven, JUnit 5)
+└── ts/                # TypeScript port + vitest suite
 ```
 
 ## Reference

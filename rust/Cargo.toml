@@ -1,0 +1,10 @@
+[package]
+name = "batch-invariant"
+version = "0.1.0"
+edition = "2021"
+description = "Batch-invariant reduction kernels: a row's output must not depend on who else is in the batch."
+license = "MIT"
+
+[lib]
+name = "batch_invariant"
+path = "src/lib.rs"
